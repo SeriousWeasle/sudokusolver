@@ -4,11 +4,14 @@ import curses, math
 class SudokuBoard:
     def __init__(self):
         #make the board an array of 9 arrays, each containing 9 zero's. Each array is a row and each item in array is a cell
-        self.board = []
-
+        self.board = self.MakeEmpty()
+   
+    def MakeEmpty(self):
+        board = []
         for i in range(9):
-            self.board.append([0, 0, 0, 0, 0, 0, 0, 0, 0])
-    
+            board.append([0, 0, 0, 0, 0, 0, 0, 0, 0])
+        return board
+
     #Get the value of a cell at position x, y on the board
     def GetCell(self, x, y):
         return self.board[y][x]
@@ -16,6 +19,19 @@ class SudokuBoard:
     #set the value of a cell at position x, y on the board
     def SetCell(self, x, y, n):
         self.board[y][x] = n
+
+#Class for game rule handling and solving
+class Solver:
+    def __init__(self):
+        self.viabilityGrids = []
+        for i in range(10):
+            self.viabilityGrids.append(MakeNewFlagGrid())
+
+    def MakeNewFlagGrid(self):
+        grid = []
+        for i in range(9):
+            grid.append([-1, -1, -1, -1, -1, -1, -1, -1, -1])
+        return grid
 
 #Class for rendering the board to the terminal
 class Render:
@@ -47,3 +63,4 @@ if __name__ == "__main__":
     render = Render()
 
     render.ColorCheck()
+    curses.endwin()
