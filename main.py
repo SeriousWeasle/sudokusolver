@@ -1,5 +1,21 @@
 import curses, math
 
+def main():
+    global stdscr
+    stdscr = curses.initscr()
+    curses.start_color()
+    stdscr.clear()
+    stdscr.refresh()
+    curses.use_default_colors()
+    for i in range(0, min(255, curses.COLORS)):
+        curses.init_pair(i + 1, i, -1)
+
+    board = SudokuBoard()
+    render = Render()
+
+    render.ColorCheck()
+    curses.endwin()
+
 #Class for containing board and getting/setting cells on it
 class SudokuBoard:
     def __init__(self):
@@ -24,14 +40,20 @@ class SudokuBoard:
 class Solver:
     def __init__(self):
         self.viabilityGrids = []
-        for i in range(10):
-            self.viabilityGrids.append(MakeNewFlagGrid())
+        for i in range(9):
+            self.viabilityGrids.append(self.MakeNewFlagGrid())
 
     def MakeNewFlagGrid(self):
         grid = []
         for i in range(9):
             grid.append([-1, -1, -1, -1, -1, -1, -1, -1, -1])
         return grid
+    
+    def GetViability(self, num, x, y):
+        return self.viabilityGrids[num - 1][y][x]
+    
+    def SetViability(self, num, state, x, y):
+        self.viabilityGrids[num - 1][y][x] = state
 
 #Class for rendering the board to the terminal
 class Render:
@@ -51,16 +73,9 @@ class Render:
 
 #Main program
 if __name__ == "__main__":
-    stdscr = curses.initscr()
-    curses.start_color()
-    stdscr.clear()
-    stdscr.refresh()
-    curses.use_default_colors()
-    for i in range(0, min(255, curses.COLORS)):
-        curses.init_pair(i + 1, i, -1)
-
-    board = SudokuBoard()
-    render = Render()
-
-    render.ColorCheck()
-    curses.endwin()
+    try:
+        main()
+    #Make sure the curses library does not eat the cursor
+    except Exception as err:
+        curses.endwin()
+        print(err)
