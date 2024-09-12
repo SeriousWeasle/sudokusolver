@@ -14,6 +14,8 @@ def main():
     render = Render()
 
     render.ColorCheck()
+
+    render.DrawBoard(board.board)
     curses.endwin()
 
 #Class for containing board and getting/setting cells on it
@@ -58,8 +60,27 @@ class Solver:
 #Class for rendering the board to the terminal
 class Render:
     def __init__(self):
-        pass
+        self.stateGrid = self.NewStateGrid()
+
+    def NewStateGrid(self):
+        stateGrid = []
+        for x in range(9):
+            row = []
+            for y in range(9):
+                row.append(-1)
+            stateGrid.append(row)
+        return stateGrid
     
+    def SetState(self, x, y, state):
+        self.stateGrid[y][x] = state
+
+    def DrawBoard(self, board):
+        stdscr.clear()
+        for y in range(9):
+            stdscr.addstr(y, 0, str(board[y]))
+        stdscr.refresh()
+        stdscr.getch()
+
     def ColorCheck(self):
         for i in range(0, min(255, curses.COLORS)):
             try:
