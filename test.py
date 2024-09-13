@@ -109,10 +109,20 @@ def GetPossibilityGrid(grid):
     return nums_possible
 
 def CullPossibilities(nums_possible):
-    #check if number is forced into top row
+    #check if number is forced into specific row
     #xxx xxx ---       xxx --- ---
     #--- xxx ---  -->  --- xxx ---
     #--- --- ---       --- --- ---
+    
+    #Plan:
+    #ROW BLOCKS
+    #1. Go over all numbers
+    #2. Go block by block; check on which row the number is allowed
+    #3. If number is only allowed on one row in one block -> remove that number from the same row in other blocks
+    #4. Check if same situation does not occur for third block
+    
+
+
     return nums_possible
 
 def IsOnlyOptionInCells(cellRange, num):
