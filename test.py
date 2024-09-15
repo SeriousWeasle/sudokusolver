@@ -109,21 +109,74 @@ def GetPossibilityGrid(grid):
     return nums_possible
 
 def CullPossibilities(nums_possible):
-    #check if number is forced into specific row
-    #xxx xxx ---       xxx --- ---
-    #--- xxx ---  -->  --- xxx ---
-    #--- --- ---       --- --- ---
-    
-    #Plan:
-    #ROW BLOCKS
-    #1. Go over all numbers
-    #2. Go block by block; check on which row the number is allowed
-    #3. If number is only allowed on one row in one block -> remove that number from the same row in other blocks
-    #4. Check if same situation does not occur for third block
-    
-
-
+    #TODO add logic.
     return nums_possible
+
+def CullPossibilities_OLD(nums_possible):
+    #CHECK ROWS
+    for y in range(3):
+        #arrays in arrays for accessing blocks in order [by][bx].
+        block1 = [[[], [], []], [[], [], []], [[], [], []]]
+        block2 = [[[], [], []], [[], [], []], [[], [], []]]
+        block3 = [[[], [], []], [[], [], []], [[], [], []]]
+
+        #make the blocks
+        for by in range(3):
+            for bx in range(3):
+                block1[by][bx] = nums_possible[(y * 3) + by][0 + bx]
+                block2[by][bx] = nums_possible[(y * 3) + by][3 + bx]
+                block3[by][bx] = nums_possible[(y * 3) + by][6 + bx]
+
+        #go over all numbers
+        for n in range(1, 10):
+            block1_rows_allowed = AllowedOnBlockRowCount(block1, n)
+            block2_rows_allowed = AllowedOnBlockRowCount(block2, n)
+            block3_rows_allowed = AllowedOnBlockRowCount(block3, n)
+
+            if (block1_rows_allowed == 1): #only allowed on 1 row in the first block -> remove from other blocks
+                #get the row number where the number is allowed
+                targetRow = AllowedOnBlockRow(block1, n)
+                for x in range(3, 9):
+                    if (n in nums_possible[(y * 3) + targetRow][x]):
+                        print(f"[CULL MODE] x:{x}, y:{(y * 3) + targetRow}, num:{n}")
+                        nums_possible[(y * 3) + targetRow][x].remove(n)
+
+            if (block2_rows_allowed == 1):
+                targetRow = AllowedOnBlockRow(block2, n)
+                for x in range(0, 3):
+                    if (n in nums_possible[(y * 3) + targetRow][x]):
+                        print(f"[CULL MODE] x:{x}, y:{(y * 3) + targetRow}, num:{n}")
+                        nums_possible[(y * 3) + targetRow][x].remove(n)
+                for x in range(6, 9):
+                    if (n in nums_possible[(y * 3) + targetRow][x]):
+                        print(f"[CULL MODE] x:{x}, y:{(y * 3) + targetRow}, num:{n}")
+                        nums_possible[(y * 3) + targetRow][x].remove(n)
+            
+            if (block3_rows_allowed == 1):
+                targetRow = AllowedOnBlockRow(block3, n)
+                for x in range(0, 6):
+                    if (n in nums_possible[(y * 3) + targetRow][x]):
+                        print(f"[CULL MODE] x:{x}, y:{(y * 3) + targetRow}, num:{n}")
+                        nums_possible[(y * 3) + targetRow][x].remove(n)
+                
+    return nums_possible
+
+def AllowedOnBlockRowCount(block, num):
+    count = 0
+    state = [False, False, False]
+    for i in range(len(block)):
+        row = block[i]
+        for cell in row:
+            if num in cell:
+                if state[i] == False: count += 1
+                state[i] = True
+    return count
+
+def AllowedOnBlockRow(block, num):
+    for r in range(3):
+        row = block[r]
+        for cell in row:
+            if num in  cell: return r
 
 def IsOnlyOptionInCells(cellRange, num):
     count = 0
@@ -135,6 +188,7 @@ def IsOnlyOptionInCells(cellRange, num):
 def DoSolveStep(grid):
     #get all possible fill-in locations
     nums_possible = GetPossibilityGrid(grid)
+    nums_possible = CullPossibilities(nums_possible) 
     solves = 0
 
     #go over grid and fill in possible cells via a naïve approach (only fill in cell if that is the only possible number)
