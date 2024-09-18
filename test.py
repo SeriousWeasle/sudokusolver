@@ -1,6 +1,9 @@
-import math
+import math, colorama
 easytest = "2 1 9 3 1 3 6 1 7 9 1 6 1 2 8 3 2 7 4 2 9 7 2 2 8 2 3 9 2 4 1 3 5 4 3 6 5 3 8 9 3 9 3 4 9 4 4 1 7 4 5 2 5 1 3 5 2 4 5 5 6 5 8 8 5 7 9 5 3 1 6 3 4 6 7 5 6 6 7 6 9 8 6 2 5 7 7 6 7 1 5 8 4 7 8 1 9 8 5 4 9 2 6 9 6 7 9 3 8 9 4 9 9 7"
-difftest = "2 1 5 4 1 4 9 1 2 1 2 3 7 2 7 8 2 4 9 2 5 1 4 4 6 4 2 7 4 3 9 4 8 1 5 7 3 5 3 4 5 1 7 5 4 8 5 2 3 6 8 5 6 7 9 6 1 3 7 2 6 7 1 8 7 8 9 7 4 4 8 6 5 8 4 6 8 9 6 9 7 7 9 6"
+hardtest = "1 1 6 2 1 7 5 1 2 5 2 6 9 2 3 3 3 8 4 3 7 6 3 3 7 3 5 2 4 8 4 4 4 6 4 1 9 4 2 3 5 5 8 5 9 5 6 7 6 7 6 1 8 1 7 8 2 2 9 4 4 9 3 6 9 8 9 9 1"
+extrtest = "2 1 5 4 1 4 9 1 2 1 2 3 7 2 7 8 2 4 9 2 5 1 4 4 6 4 2 7 4 3 9 4 8 1 5 7 3 5 3 4 5 1 7 5 4 8 5 2 3 6 8 5 6 7 9 6 1 3 7 2 6 7 1 8 7 8 9 7 4 4 8 6 5 8 4 6 8 9 6 9 7 7 9 6"
+
+#TODO - implement analyzing techniques from https://www.conceptispuzzles.com/index.aspx?uri=puzzle/sudoku/techniques for advanced solving
 
 #Quick test for making the solver, more of a prototype
 def main():
@@ -25,7 +28,15 @@ def main():
                     z = int(args[(n * 3) + 2])
                     grid[y - 1][x - 1] = z
         elif(user_in.lower() == "hard"):
-            args = difftest.split()
+            args = hardtest.split()
+            if (len(args) % 3 == 0):
+                for n in range(int(len(args) / 3)):
+                    x = int(args[(n * 3) + 0])
+                    y = int(args[(n * 3) + 1])
+                    z = int(args[(n * 3) + 2])
+                    grid[y - 1][x - 1] = z
+        elif(user_in.lower() == "extreme"):
+            args = extrtest.split()
             if (len(args) % 3 == 0):
                 for n in range(int(len(args) / 3)):
                     x = int(args[(n * 3) + 0])
@@ -45,10 +56,25 @@ def main():
 
     while emptyCells > 0:
         grid = DoSolveStep(grid)
-        for g in grid: print(g)
+        RenderGrid(grid)
         print()
         emptyCells = CountEmpty(grid)
         input()
+
+def RenderGrid(grid):
+    for y in range(9):
+        row = ""
+        for x in range(9):
+            num = str(grid[y][x])
+            row += ColorNumber(grid[y][x])
+            if (x % 3 == 2):
+                row += "  "
+        print(row)
+        if (y % 3 == 2): print()
+
+def ColorNumber(n):
+    formatters = [colorama.Fore.BLACK, colorama.Fore.WHITE, colorama.Fore.GREEN, colorama.Fore.BLUE, colorama.Fore.RED, colorama.Fore.MAGENTA, colorama.Fore.YELLOW, colorama.Fore.LIGHTRED_EX, colorama.Fore.LIGHTBLUE_EX, colorama.Fore.LIGHTMAGENTA_EX]
+    return f"{formatters[n]}{n}{colorama.Style.RESET_ALL}"
 
 def CountEmpty(grid):
     num_empty = 0
@@ -79,7 +105,6 @@ def GetPossibilityGrid(grid):
     #go over every number in every cell
     for y in range(9):
         for x in range(9):
-
             #only check every number if cell is empty
             if (grid[y][x] == 0):
                 for n in range(1, 10):
@@ -109,10 +134,6 @@ def GetPossibilityGrid(grid):
     return nums_possible
 
 def CullPossibilities(nums_possible):
-    #TODO add logic.
-    return nums_possible
-
-def CullPossibilities_OLD(nums_possible):
     #CHECK ROWS
     for y in range(3):
         #arrays in arrays for accessing blocks in order [by][bx].
@@ -120,7 +141,7 @@ def CullPossibilities_OLD(nums_possible):
         block2 = [[[], [], []], [[], [], []], [[], [], []]]
         block3 = [[[], [], []], [[], [], []], [[], [], []]]
 
-        #make the blocks
+        #make the blocks on this row
         for by in range(3):
             for bx in range(3):
                 block1[by][bx] = nums_possible[(y * 3) + by][0 + bx]
@@ -138,45 +159,117 @@ def CullPossibilities_OLD(nums_possible):
                 targetRow = AllowedOnBlockRow(block1, n)
                 for x in range(3, 9):
                     if (n in nums_possible[(y * 3) + targetRow][x]):
-                        print(f"[CULL MODE] x:{x}, y:{(y * 3) + targetRow}, num:{n}")
+                        print(f"[CULL MODE | ROWS] x:{x}, y:{(y * 3) + targetRow}, num:{n}")
                         nums_possible[(y * 3) + targetRow][x].remove(n)
 
             if (block2_rows_allowed == 1):
                 targetRow = AllowedOnBlockRow(block2, n)
                 for x in range(0, 3):
                     if (n in nums_possible[(y * 3) + targetRow][x]):
-                        print(f"[CULL MODE] x:{x}, y:{(y * 3) + targetRow}, num:{n}")
+                        print(f"[CULL MODE | ROWS] x:{x}, y:{(y * 3) + targetRow}, num:{n}")
                         nums_possible[(y * 3) + targetRow][x].remove(n)
                 for x in range(6, 9):
                     if (n in nums_possible[(y * 3) + targetRow][x]):
-                        print(f"[CULL MODE] x:{x}, y:{(y * 3) + targetRow}, num:{n}")
+                        print(f"[CULL MODE | ROWS] x:{x}, y:{(y * 3) + targetRow}, num:{n}")
                         nums_possible[(y * 3) + targetRow][x].remove(n)
             
             if (block3_rows_allowed == 1):
                 targetRow = AllowedOnBlockRow(block3, n)
                 for x in range(0, 6):
                     if (n in nums_possible[(y * 3) + targetRow][x]):
-                        print(f"[CULL MODE] x:{x}, y:{(y * 3) + targetRow}, num:{n}")
+                        print(f"[CULL MODE | ROWS] x:{x}, y:{(y * 3) + targetRow}, num:{n}")
                         nums_possible[(y * 3) + targetRow][x].remove(n)
-                
+    
+    #CHECK COLS
+    for x in range(3):
+        #block arrays for this column in order [by][bx]
+        block1 = [[[], [], []], [[], [], []], [[], [], []]]
+        block2 = [[[], [], []], [[], [], []], [[], [], []]]
+        block3 = [[[], [], []], [[], [], []], [[], [], []]]
+
+        #make the blocks
+        for by in range(3):
+            for bx in range(3):
+                block1[by][bx] = nums_possible[0 + by][(x * 3) + bx]
+                block2[by][bx] = nums_possible[3 + by][(x * 3) + bx]
+                block3[by][bx] = nums_possible[6 + by][(x * 3) + bx]
+        
+        #go over all numbers
+        for n in range(1, 10):
+            block1_cols_allowed = AllowedOnBlockColCount(block1, n)
+            block2_cols_allowed = AllowedOnBlockColCount(block2, n)
+            block3_cols_allowed = AllowedOnBlockColCount(block3, n)
+            
+            if (block1_cols_allowed == 1):
+                targetCol = AllowedOnBlockCol(block1, n)
+                for y in range(3, 9):
+                    if(n in nums_possible[y][(x * 3) + targetCol]):
+                        print(f"[CULL MODE | COLS] x:{(x * 3) + targetCol}, y{y}, num:{n}")
+                        nums_possible[y][(x * 3) + targetCol].remove(n)
+
+            if(block2_cols_allowed == 1):
+                targetCol = AllowedOnBlockCol(block2, n)
+                for y in range(0, 3):
+                    if(n in nums_possible[y][(x * 3) + targetCol]):
+                        print(f"[CULL MODE | COLS] x:{(x * 3) + targetCol}, y{y}, num:{n}")
+                        nums_possible[y][(x * 3) + targetCol].remove(n)
+                for y in range(6, 9):
+                    if(n in nums_possible[y][(x * 3) + targetCol]):
+                        print(f"[CULL MODE | COLS] x:{(x * 3) + targetCol}, y{y}, num:{n}")
+                        nums_possible[y][(x * 3) + targetCol].remove(n)
+            
+            if(block3_cols_allowed == 1):
+                targetCol = AllowedOnBlockCol(block3, n)
+                for y in range(0, 6):
+                    if(n in nums_possible[y][(x * 3) + targetCol]):
+                        print(f"[CULL MODE | COLS] x:{(x * 3) + targetCol}, y{y}, num:{n}")
+                        nums_possible[y][(x * 3) + targetCol].remove(n)
+
     return nums_possible
 
 def AllowedOnBlockRowCount(block, num):
     count = 0
     state = [False, False, False]
-    for i in range(len(block)):
-        row = block[i]
+    for r in range(3):
+        row = block[r]
         for cell in row:
             if num in cell:
-                if state[i] == False: count += 1
-                state[i] = True
+                if state[r] == False: count += 1
+                state[r] = True
     return count
+
+def AllowedOnBlockColCount(block, num):
+    count = 0
+    state = [False, False, False]
+    for c in range(3):
+        col = [block[0][c], block[1][c], block[2][c]]
+        for cell in col:
+            if num in cell:
+                if state[c] == False: count += 1
+                state[c] = True
+    return count
+
+def NumberNotInRow(grid, y, num):
+    return num not in grid[y]
+
+def NumberNotInCol(grid, x, num):
+    #this function checks if number is not filled in in a column on the grid
+    col = []
+    for y in range(9):
+        col.append(grid[y][x])
+    return num not in col
 
 def AllowedOnBlockRow(block, num):
     for r in range(3):
         row = block[r]
         for cell in row:
-            if num in  cell: return r
+            if num in cell: return r
+
+def AllowedOnBlockCol(block, num):
+    for c in range(3):
+        col = [block[0][c], block[1][c], block[2][c]]
+        for cell in col:
+            if num in cell: return c
 
 def IsOnlyOptionInCells(cellRange, num):
     count = 0
@@ -197,7 +290,7 @@ def DoSolveStep(grid):
             if (grid[y][x] == 0 and len(nums_possible[y][x]) == 1):
                 print(f"[SIMPLE MODE] x:{x + 1}, y:{y + 1}, num:{nums_possible[y][x][0]}")
                 grid[y][x] = nums_possible[y][x][0]
-                nums_possible[y][x] = []
+                #nums_possible[y][x] = []
                 solves += 1
     
     if(solves == 0):
@@ -207,10 +300,10 @@ def DoSolveStep(grid):
                 #only check if cell is not already filled in
                 if(grid[y][x] == 0 and len(nums_possible[y][x]) > 0):
                     for n in nums_possible[y][x]:
-                        if(IsOnlyOptionInCells(nums_possible[y], n)):
+                        if(IsOnlyOptionInCells(nums_possible[y], n) and NumberNotInRow(grid, y, n)):
                             print(f"[ROWS MODE] x:{x + 1}, y:{y + 1}, num:{n}")
                             grid[y][x] = n
-                            nums_possible[y][x] = []
+                            #nums_possible[y][x] = []
                             solves += 1
 
     if(solves == 0):
@@ -223,10 +316,10 @@ def DoSolveStep(grid):
                         col = []
                         for z in range(9):
                             col.append(nums_possible[z][x])
-                        if(IsOnlyOptionInCells(col, n)):
+                        if(IsOnlyOptionInCells(col, n) and NumberNotInCol(grid, x, n)):
                             print(f"[COLS MODE] x:{x + 1}, y:{y + 1}, num:{n}")
                             grid[y][x] = n
-                            nums_possible[y][x] = []
+                            #nums_possible[y][x] = []
                             solves += 1
 
     if (solves == 0):
@@ -246,7 +339,7 @@ def DoSolveStep(grid):
                         if(IsOnlyOptionInCells(block, n)):
                             print(f"[BLOCKS MODE] x:{x + 1}, y:{y + 1}, num:{n}")
                             grid[y][x] = n
-                            nums_possible[y][x] = []
+                            #nums_possible[y][x] = []
                             solves += 1
     return grid
 
