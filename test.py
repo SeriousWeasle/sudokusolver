@@ -5,6 +5,9 @@ extrtest = "2 1 5 4 1 4 9 1 2 1 2 3 7 2 7 8 2 4 9 2 5 1 4 4 6 4 2 7 4 3 9 4 8 1 
 
 #TODO - implement analyzing techniques from https://www.conceptispuzzles.com/index.aspx?uri=puzzle/sudoku/techniques for advanced solving
 
+#this program is a huge garbagefire of repeating code, horrible optimization and a few other bad practices thrown in for fun
+#next to that, it is programmed to solve sudokus in a similar fashion as me, so this program can only solve puzzles that I can solve by hand as well
+
 #Quick test for making the solver, more of a prototype
 def main():
     grid = NewGrid()
