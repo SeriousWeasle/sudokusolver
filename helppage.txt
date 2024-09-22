@@ -1,0 +1,17 @@
+Sudoku Solver v1.0
+By: SeriousWeasle
+
+General help:
+exit            - Closes the program
+quit            - Same as exit
+help            - Shows this message
+load [filename] - Load puzzle from file
+save [filename] - Save current puzzle to a .sudoku file
+start           - Starts the solver
+lines           - Enter lines mode to enter a puzzle line by line
+set x y value   - Set cell at position (x, y) to the specified value; range x and y [0; 8]
+
+Lines mode specific
+exit            - Closes the program
+quit            - Same as exit
+stop            - Exit lines mode and do not apply changes
