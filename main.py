@@ -113,25 +113,38 @@ class SudokuGrid:
                 if (y % 3 == 2): returnstr += "\n"
         return returnstr
 
+class Solver:
+    #Class for game logic and actual solving
+    def __init__(this):
+        this.sudoku = SudokuGrid()
+        this.render = Render()
+    
+    def IsSolved(this):
+        return this.sudoku.IsSolved()
+    
+    def DoSolveStep(this):
+        pass
+    
+    def MakePencilMarks(this):
+        pass
+
 #class for setting colors of blocks and drawing a fancy grid to the terminal
 class Render:
-    #store a states grid for all numbers and a list of all cells being drawn as checked
+    #store a states grid for all numbers and a list of all cells being drawn as checked 
     def __init__(this):
         pass
 
     def Draw(this, grid):
         print(grid)
 
-class Solver:
-    #Class for game logic and actual solving
+class InputHandler:
     def __init__(this):
-        this.sudoku = SudokuGrid()
-        this.render = Render()
-
+        this.solver = Solver()
+    
     def DoUserInput(this):
-        doing_setup = True
+        this.doing_setup = True
 
-        while(doing_setup):
+        while(this.doing_setup):
             #Get the user input and split at spaces for args
             print("Enter command:")
             user_input = input("> ").lower()
@@ -157,7 +170,7 @@ class Solver:
             print(PROGRAM_HELPPAGE)
 
         elif(args[0] == "start"):
-            doing_setup = False
+            this.doing_setup = False
             
         elif(args[0] == "lines"):
             this.ParseLinesToGrid(this.InputByLines())
@@ -186,15 +199,15 @@ class Solver:
                 print("Could not parse x, y and value to integers")
                 
             if(y < 9 and x < 9 and val > -1 and val < 10):
-                this.sudoku.SetCell(x, y, val)
-                print(f"Current gamestate:\n{this.sudoku}")
+                this.solver.sudoku.SetCell(x, y, val)
+                print(f"Current gamestate:\n{this.solver.sudoku}")
             else: print(f"Specified coordinates out of range.\nRange xy=[0,8] val=[0,9]; got x:{x}, y:{y}, val:{val}")
         else:
             print("Command not recognised; type 'help' for available commands")
 
     def WriteGridToFile(this, filename):
         writestr = ""
-        for y, row in enumerate(this.sudoku.grid):
+        for y, row in enumerate(this.solver.sudoku.grid):
             for cell in row:
                 writestr += str(cell.value)
             if(y < 8): writestr += "\n"
@@ -228,15 +241,16 @@ class Solver:
         for y, line in enumerate(lines):
             for x, chr in enumerate(line):
                 if (chr in VALID_CHARS):
-                    this.sudoku.SetCell(x, y, int(chr))
-        print(f"Current gamestate:\n{this.sudoku}")
+                    this.solver.sudoku.SetCell(x, y, int(chr))
+        print(f"Current gamestate:\n{this.solver.sudoku}")
 
     def RunSolver(this):
-        while(not this.sudoku.IsSolved()):
+        while(not this.solver.IsSolved()):
             print("Doing solving step")
+            this.solver.DoSolveStep()
             time.sleep(0.1) #prevents code from running too fast incase of shenanigans
 
 if __name__ == "__main__":
-    solver = Solver()
-    solver.DoUserInput()
-    solver.RunSolver()
+    program = InputHandler()
+    program.DoUserInput()
+    program.RunSolver()
